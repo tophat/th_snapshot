@@ -155,6 +155,7 @@ class JSONSnapshotExtension(SingleFileSnapshotExtension):
         exclude: Optional["PropertyFilter"] = None,
         include: Optional["PropertyFilter"] = None,
         matcher: Optional["PropertyMatcher"] = None,
+        **kwargs: Any,
     ) -> "SerializedData":
         data = self._filter(
             data=data,

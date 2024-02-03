@@ -64,6 +64,9 @@ class SnapshotAssertion:
     exclude: Optional["PropertyFilter"] = None
     matcher: Optional["PropertyMatcher"] = None
 
+    # context is reserved exclusively for custom extensions
+    context: Optional[Dict[str, Any]] = None
+
     _exclude: Optional["PropertyFilter"] = field(
         init=False,
         default=None,
@@ -109,7 +112,8 @@ class SnapshotAssertion:
     def __init_extension(
         self, extension_class: Type["AbstractSyrupyExtension"]
     ) -> "AbstractSyrupyExtension":
-        return extension_class()
+        kwargs = {"context": self.context} if self.context else {}
+        return extension_class(**kwargs)
 
     @property
     def extension(self) -> "AbstractSyrupyExtension":
@@ -178,6 +182,7 @@ class SnapshotAssertion:
         include: Optional["PropertyFilter"] = None,
         matcher: Optional["PropertyMatcher"] = None,
         extension_class: Optional[Type["AbstractSyrupyExtension"]] = None,
+        context: Optional[Dict[str, Any]] = None,
     ) -> "SnapshotAssertion":
         """
         Create new snapshot assertion fixture with provided values. This preserves
@@ -191,6 +196,7 @@ class SnapshotAssertion:
             test_location=self.test_location,
             extension_class=extension_class or self.extension_class,
             session=self.session,
+            context=context or self.context,
         )
 
     def use_extension(
@@ -207,7 +213,10 @@ class SnapshotAssertion:
 
     def _serialize(self, data: "SerializableData") -> "SerializedData":
         return self.extension.serialize(
-            data, exclude=self._exclude, include=self._include, matcher=self.__matcher
+            data,
+            exclude=self._exclude,
+            include=self._include,
+            matcher=self.__matcher,
         )
 
     def get_assert_diff(self) -> List[str]:
@@ -264,6 +273,7 @@ class SnapshotAssertion:
         extension_class: Optional[Type["AbstractSyrupyExtension"]] = None,
         matcher: Optional["PropertyMatcher"] = None,
         name: Optional["SnapshotIndex"] = None,
+        context: Optional[Dict[str, Any]] = None,
     ) -> "SnapshotAssertion":
         """
         Modifies assertion instance options
@@ -272,14 +282,18 @@ class SnapshotAssertion:
             self.__with_prop("_exclude", exclude)
         if include:
             self.__with_prop("_include", include)
-        if extension_class:
-            self.__with_prop("_extension", self.__init_extension(extension_class))
         if matcher:
             self.__with_prop("_matcher", matcher)
         if name:
             self.__with_prop("_custom_index", name)
         if diff is not None:
             self.__with_prop("_snapshot_diff", diff)
+        if context and context != self.context:
+            self.__with_prop("context", context)
+            # We need to force the extension to be re-initialized if the context changes
+            extension_class = extension_class or self.extension_class
+        if extension_class:
+            self.__with_prop("_extension", self.__init_extension(extension_class))
         return self
 
     def __repr__(self) -> str:
@@ -290,10 +304,12 @@ class SnapshotAssertion:
 
     def _assert(self, data: "SerializableData") -> bool:
         snapshot_location = self.extension.get_location(
-            test_location=self.test_location, index=self.index
+            test_location=self.test_location,
+            index=self.index,
         )
         snapshot_name = self.extension.get_snapshot_name(
-            test_location=self.test_location, index=self.index
+            test_location=self.test_location,
+            index=self.index,
         )
         snapshot_data: Optional["SerializedData"] = None
         serialized_data: Optional["SerializedData"] = None
@@ -316,7 +332,8 @@ class SnapshotAssertion:
                 not tainted
                 and snapshot_data is not None
                 and self.extension.matches(
-                    serialized_data=serialized_data, snapshot_data=snapshot_data
+                    serialized_data=serialized_data,
+                    snapshot_data=snapshot_data,
                 )
             )
             assertion_success = matches

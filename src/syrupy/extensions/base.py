@@ -80,7 +80,10 @@ class SnapshotCollectionStorage(ABC):
 
     @classmethod
     def get_snapshot_name(
-        cls, *, test_location: "PyTestLocation", index: "SnapshotIndex" = 0
+        cls,
+        *,
+        test_location: "PyTestLocation",
+        index: "SnapshotIndex" = 0,
     ) -> str:
         """Get the snapshot name for the assertion index in a test location"""
         index_suffix = ""
@@ -225,7 +228,11 @@ class SnapshotCollectionStorage(ABC):
 
     @abstractmethod
     def _read_snapshot_data_from_location(
-        self, *, snapshot_location: str, snapshot_name: str, session_id: str
+        self,
+        *,
+        snapshot_location: str,
+        snapshot_name: str,
+        session_id: str,
     ) -> Optional["SerializedData"]:
         """
         Get only the snapshot data from location for assertion
@@ -259,7 +266,9 @@ class SnapshotReporter(ABC):
     _context_line_count = 1
 
     def diff_snapshots(
-        self, serialized_data: "SerializedData", snapshot_data: "SerializedData"
+        self,
+        serialized_data: "SerializedData",
+        snapshot_data: "SerializedData",
     ) -> "SerializedData":
         env = {DISABLE_COLOR_ENV_VAR: "true"}
         attrs = {"_context_line_count": 0}
@@ -267,7 +276,9 @@ class SnapshotReporter(ABC):
             return "\n".join(self.diff_lines(serialized_data, snapshot_data))
 
     def diff_lines(
-        self, serialized_data: "SerializedData", snapshot_data: "SerializedData"
+        self,
+        serialized_data: "SerializedData",
+        snapshot_data: "SerializedData",
     ) -> Iterator[str]:
         for line in self.__diff_lines(str(snapshot_data), str(serialized_data)):
             yield reset(line)

@@ -54,7 +54,10 @@ class SingleFileSnapshotExtension(AbstractSyrupyExtension):
 
     @classmethod
     def get_snapshot_name(
-        cls, *, test_location: "PyTestLocation", index: "SnapshotIndex" = 0
+        cls,
+        *,
+        test_location: "PyTestLocation",
+        index: "SnapshotIndex" = 0,
     ) -> str:
         return cls.__clean_filename(
             AbstractSyrupyExtension.get_snapshot_name(
@@ -79,7 +82,9 @@ class SingleFileSnapshotExtension(AbstractSyrupyExtension):
         return str(Path(original_dirname).joinpath(test_location.basename))
 
     def _read_snapshot_collection(
-        self, *, snapshot_location: str
+        self,
+        *,
+        snapshot_location: str,
     ) -> "SnapshotCollection":
         file_ext_len = len(self._file_extension) + 1 if self._file_extension else 0
         filename_wo_ext = snapshot_location[:-file_ext_len]
@@ -90,7 +95,11 @@ class SingleFileSnapshotExtension(AbstractSyrupyExtension):
         return snapshot_collection
 
     def _read_snapshot_data_from_location(
-        self, *, snapshot_location: str, snapshot_name: str, session_id: str
+        self,
+        *,
+        snapshot_location: str,
+        snapshot_name: str,
+        session_id: str,
     ) -> Optional["SerializableData"]:
         try:
             with open(
@@ -116,7 +125,9 @@ class SingleFileSnapshotExtension(AbstractSyrupyExtension):
 
     @classmethod
     def _write_snapshot_collection(
-        cls, *, snapshot_collection: "SnapshotCollection"
+        cls,
+        *,
+        snapshot_collection: "SnapshotCollection",
     ) -> None:
         filepath, data = (
             snapshot_collection.location,

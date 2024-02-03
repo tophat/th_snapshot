@@ -1,3 +1,4 @@
+import pickle
 from collections import defaultdict
 from dataclasses import (
     dataclass,
@@ -54,7 +55,7 @@ class SnapshotSession:
     )
 
     _queued_snapshot_writes: Dict[
-        Tuple[Type["AbstractSyrupyExtension"], str],
+        Tuple[Type["AbstractSyrupyExtension"], Optional[bytes], str],
         List[Tuple["SerializedData", "PyTestLocation", "SnapshotIndex"]],
     ] = field(default_factory=dict)
 
@@ -68,7 +69,18 @@ class SnapshotSession:
         snapshot_location = extension.get_location(
             test_location=test_location, index=index
         )
-        key = (extension.__class__, snapshot_location)
+
+        extension_context = getattr(extension, "context", None)
+
+        try:
+            extension_kwargs_bytes = (
+                pickle.dumps(extension_context) if extension_context else None
+            )
+        except pickle.PicklingError:
+            print("Extension context must be serializable.")
+            raise
+
+        key = (extension.__class__, extension_kwargs_bytes, snapshot_location)
         queue = self._queued_snapshot_writes.get(key, [])
         queue.append((data, test_location, index))
         self._queued_snapshot_writes[key] = queue
@@ -76,11 +88,22 @@ class SnapshotSession:
     def flush_snapshot_write_queue(self) -> None:
         for (
             extension_class,
+            extension_kwargs_bytes,
             snapshot_location,
         ), queued_write in self._queued_snapshot_writes.items():
             if queued_write:
-                extension_class.write_snapshot(
-                    snapshot_location=snapshot_location, snapshots=queued_write
+                # It's possible to instantiate an extension with context. We need to
+                # ensure we never lose context between instantiations (since we may
+                # instantiate multiple times in a test session).
+                extension_kwargs = (
+                    {"context": pickle.loads(extension_kwargs_bytes)}
+                    if extension_kwargs_bytes
+                    else {}
+                )
+                extension = extension_class(**extension_kwargs)
+                extension.write_snapshot(
+                    snapshot_location=snapshot_location,
+                    snapshots=queued_write,
                 )
         self._queued_snapshot_writes = {}
 
