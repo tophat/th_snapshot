@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13-dev']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13-dev']
       fail-fast: ${{ !contains(github.event.pull_request.labels.*.name, 'ci/run-all-tests') }}
     steps:
       - uses: actions/checkout@v4.2.2

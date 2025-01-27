@@ -39,7 +39,8 @@ Syrupy will always be compatible with the latest version of Python and Pytest. I
 
 | Syrupy Version | Python Support | Pytest Support |
 | -------------- | -------------- | -------------- |
-| 4.x.x          | >3.8.1         | >=7            |
+| 5.x.x          | >3.9           | >=8            |
+| 4.x.x          | >3.8.1,        | >=7,   <9      |
 | 3.x.x          | >=3.7, <4      | >=5.1, <8      |
 | 2.x.x          | >=3.6, <4      | >=5.1, <8      |
 

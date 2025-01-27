@@ -12,7 +12,6 @@ classifiers = [
     'Intended Audience :: Developers',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -29,22 +28,22 @@ include = ['src/syrupy/**/*']
 syrupy = 'syrupy'
 
 [tool.poetry.dependencies]
-python = '>=3.8.1'
-pytest = '>=7.0.0,<9.0.0'
+python = '>=3.9'
+pytest = ">=8.0.0"
 
 [tool.poetry.group.test.dependencies]
-invoke = '^2.0.0'
-coverage = { version = '^7.6.1', extras = ['toml'] }
-pytest-benchmark = '^4.0.0'
-pytest-xdist = '^3.1.0'
+invoke = "^2.2.0"
+coverage = { version = "^7.6.3", extras = ['toml'] }
+pytest-benchmark = "^4.0.0"
+pytest-xdist = "^3.6.1"
 
 [tool.poetry.group.dev.dependencies]
-mypy = '^1.0.1'
+mypy = "^1.12.0"
 py-githooks = '^1.1.1'
 twine = '^5.1.1'
-semver = '^3.0.0'
-setuptools-scm = '^8.0.0'
-debugpy = '^1.6.6'
+semver = '^3.0.2'
+setuptools-scm = '^8.1.0'
+debugpy = '^1.8.7'
 ruff = '>=0.7.0'
 
 [tool.pytest.ini_options]
@@ -72,5 +71,5 @@ extend-select = [
 ]
 
 [build-system]
-requires = ['poetry-core>=1.9.0']
+requires = ['poetry-core>=1.9.1']
 build-backend = 'poetry.core.masonry.api'
