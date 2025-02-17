@@ -33,6 +33,10 @@ class PathTypeError(TypeError):
     pass
 
 
+class StrictPathTypeError(PathTypeError):
+    pass
+
+
 def path_type(
     mapping: Optional[Dict[str, Tuple["PropertyValueType", ...]]] = None,
     *,
@@ -63,7 +67,7 @@ def path_type(
                         if isinstance(data, type_to_match):
                             return replacer(data, matches)
                     if strict:
-                        raise PathTypeError(
+                        raise StrictPathTypeError(
                             gettext(
                                 "{} at '{}' of type {} does not "
                                 "match any of the expected types: {}"
@@ -107,3 +111,23 @@ def _path_match(path: str, pattern: str, is_regex: bool) -> "MatchResult":
     if not is_regex:
         pattern = re.escape(pattern)
     return re.fullmatch(pattern, path)
+
+
+def compose_matchers(*matchers: "PropertyMatcher") -> "PropertyMatcher":
+    """
+    Composes 1 or more matchers into a single matcher.
+    """
+
+    def _matcher(
+        *, data: "SerializableData", path: "PropertyPath"
+    ) -> Optional["SerializableData"]:
+        for matcher in matchers:
+            try:
+                data = matcher(data=data, path=path)
+            except StrictPathTypeError:
+                # ignore strict mode when composing matchers
+                pass
+
+        return data
+
+    return _matcher

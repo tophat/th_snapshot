@@ -163,6 +163,28 @@ It should return the replacement value to be serialized or the original unmutate
 
 **NOTE:** Do not mutate the value received as it could cause unintended side effects.
 
+##### Composing Matchers
+
+Multiple matchers can be composed together using `matchers`, e.g.:
+
+```py
+from syrupy.matchers import compose_matchers
+
+def test_multiple_matchers(snapshot):
+    data = {
+        "number": 1,
+        "datetime": datetime.datetime.now(),
+        "float": 1.3
+    }
+
+    assert data == snapshot(
+        matcher=compose_matchers(
+            path_type(types=(int, float), replacer=lambda *_: "MATCHER_1"),
+            path_type(types=(datetime.datetime,), replacer=lambda *_: "MATCHER_2"),
+        ),
+    )
+```
+
 ##### Built-In Matchers
 
 Syrupy comes with built-in helpers that can be used to make easy work of using property matchers.

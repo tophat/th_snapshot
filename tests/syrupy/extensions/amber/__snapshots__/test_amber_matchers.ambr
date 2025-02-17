@@ -54,6 +54,13 @@
     'specific_number': 5,
   })
 # ---
+# name: test_multiple_matchers
+  dict({
+    'datetime': 'MATCHER_2',
+    'float': 'MATCHER_1',
+    'number': 'MATCHER_1',
+  })
+# ---
 # name: test_raises_unexpected_type
   dict({
     'date_created': datetime,

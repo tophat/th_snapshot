@@ -9,6 +9,7 @@ from syrupy.extensions.amber.serializer import (
 )
 from syrupy.matchers import (
     PathTypeError,
+    compose_matchers,
     path_type,
     path_value,
 )
@@ -128,3 +129,15 @@ def test_regex_matcher_str_value(request, snapshot, tmp_path):
         "dir": str(tmp_path),
     }
     assert actual == snapshot(matcher=my_matcher)
+
+
+def test_multiple_matchers(snapshot):
+    data = {"number": 1, "datetime": datetime.datetime.now(), "float": 1.3}
+
+    assert data == snapshot(
+        matcher=compose_matchers(
+            path_type(types=(list,), replacer=lambda *_: "DO_NOT_MATCH"),
+            path_type(types=(int, float), replacer=lambda *_: "MATCHER_1"),
+            path_type(types=(datetime.datetime,), replacer=lambda *_: "MATCHER_2"),
+        ),
+    )
